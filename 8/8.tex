@@ -73,6 +73,56 @@ x && Wv^{(0)} && \text{ReLU}(v^{(1)}) && w^Tv^{(2)} && \sigma(v^{(3)}) && -\log{
 \end{array}
 \]
 
+\subsubsection{Exercise: Deriving parameter updates for NN with 1 hidden layer}
+Consider the neural network with one hidden layer shown in \ref{fig:ex1}. The first layer applies the transformation ${z}_n = g({V}{x}_n)$, and the second layer applies the transformation $\hat{{y}}_n = h({W}{z}_n)$. Assume $h$ is the canonical link function for the output GLM. Derive the gradient updates for the parameters ${V}$ and ${W}$ .
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width = 0.4\textwidth]{ex1.png}
+	%\vspace{-0.2cm}
+	\caption{Two-layer neural net. Image taken from Murphy.}
+	%\vspace{-0.5cm}
+	\label{fig:ex1}
+\end{figure}
+
+\textit{Solution.} Let the NLL for data $n$ be denoted by $J_n$.
+\begin{enumerate}
+	\item For the output layer, we have ${W} = \{{w}_k\}_{i=1}^K$. Taking the gradient of the NLL w.r.t. each ${w}_k$ yields
+	\[
+	\frac{\partial J_n}{\partial {w}_k} 
+	= \frac{\partial J_n}{\partial {b}_{nk}} \frac{\partial {b}_{nk}}{\partial {w}_k}
+	= (\hat{{y}}_n - {y}_n) {z}_n,
+	\]
+	where we derive $\frac{\partial J_n}{\partial {b}_{nk}} = \hat{{y}}_n - {y}_n$ by using the results for GLMs. We call this quantity the ``error signal'' for the output layer: $\hat{{y}}_n - {y}_n = \delta_{nk}^w$.
+	
+	\item For the hidden layer, we have ${V} = \{{v}_j\}_{j=1}^H$. Taking the gradient of the NLL w.r.t. each ${v}_j$ yields
+	\[
+	\frac{\partial J_n}{\partial {v}_j} 
+	= \frac{\partial J_n}{\partial {a}_{nj}} \frac{\partial {a}_{nj}}{\partial {v}_j}
+	= \delta_{nj}^v {x}_n,
+	\]
+	where $\delta_{nj}^v$ is the error signal for the hidden layer. We can derive the error signal by applying the chain rule again:
+	\[
+	\delta_{nj}^v 
+	= \frac{\partial J_n}{\partial {a}_{nj}}
+	= \sum_{k=1}^K \frac{\partial J_n}{\partial {b}_{nk}} \frac{\partial {b}_{nk}}{\partial {a}_{nj}}
+	= \sum_{k=1}^K \delta_{nk}^w \frac{\partial {b}_{nk}}{\partial {a}_{nj}}
+	\]
+	Note that by definition, 
+	\[
+	{b}_{nk} 
+	= \langle {w}_k, g({a}_n)\rangle
+	= \sum_{j} w_{kj} g(a_{nj})
+	\rightarrow
+	\frac{\partial {b}_{nk}}{\partial {a}_{nj}}
+	= w_{kj} g'(a_{nj})
+	\]
+	Combining, the error signal for the hidden layer is
+	\[
+	\delta_{nj}^v = \sum_{k=1}^K \delta_{nk}^w w_{kj} g'(a_{nj})
+	\]
+\end{enumerate}
+
 \subsubsection{Writing software for neural networks}
 \begin{itemize}
 \item ``blocks'' style neural network (e.g. Torch)
